@@ -18,6 +18,10 @@
 }
 
 @media only screen and (min-width:320px) and (max-width:767px) {
+    .dimage_item img {
+        object-fit: contain;
+        pointer-events: none;
+    }
     .checkout-shipping .card-header {
         padding: 15px;
     }
@@ -30,7 +34,7 @@
     .menu-logo {
         height: 40px;
     }
-        
+
     .logo-item {
         height: 40px;
         text-align: center;
@@ -40,7 +44,7 @@
         grid-template-columns: repeat(2, 1fr);
         grid-gap: 10px;
     }
-        
+
     .footer_nav ul li a span {
         display: block;
         font-weight: 400;
@@ -162,7 +166,7 @@
         border: 1px solid #ddd;
         padding: 20px  20px;;
     }
-    
+
     .mobilemenu-bottom ul li {
         display: block;
         padding: 8px 0;
@@ -197,7 +201,7 @@
         display: block;
     }
 
-   
+
     .mobile-menu-logo {
         display: flex;
         align-items: center;
@@ -568,7 +572,7 @@
         text-align: center !important;
     }
 
-    
+
     .search_product {
         position: absolute;
         width: 330px;
@@ -612,7 +616,7 @@
         justify-content: flex-end;
         margin-right: 1px;
     }
-    
+
     .menu-bag i {
         font-size: 20px;
     }
@@ -693,7 +697,7 @@
     .social_link {
         justify-content: left;
     }
-        
+
     li.mobile_home {
         border: 2px solid #ddd;
         margin-top: -27px;
@@ -709,8 +713,8 @@
     }
      .cart_btn a {
         font-size: 14px;
-    }   
-        
+    }
+
     .mobile_home span i {
         width: 0 !important;
         height: 0 !important;
@@ -718,7 +722,7 @@
         border-radius: 0 !important;
         margin-right: 22px;
     }
-    
+
     a.view_more_btn {
         text-align: right;
         float: right;
@@ -757,7 +761,7 @@
         padding-top: 25px;
     }
 
-    
+
     .category-sidebar {
         position: fixed;
         z-index: 9999;

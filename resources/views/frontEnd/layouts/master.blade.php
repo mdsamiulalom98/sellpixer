@@ -20,8 +20,8 @@
         <!-- toastr css -->
         <link rel="stylesheet" href="{{asset('public/backEnd/')}}/assets/css/toastr.min.css" />
         <link rel="stylesheet" href="{{asset('public/frontEnd/css/wsit-menu.css')}}" />
-        <link rel="stylesheet" href="{{asset('public/frontEnd/css/style.css?v=1.3.9')}}" />
-        <link rel="stylesheet" href="{{asset('public/frontEnd/css/responsive.css?v=1.4.2')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/style.css?v=1.0.0')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/responsive.css?v=1.0.0')}}" />
         <script src="{{asset('public/frontEnd/js/jquery-3.7.1.min.js')}}"></script>
         @foreach($pixels as $pixel)
         <!-- Facebook Pixel Code -->
@@ -49,8 +49,8 @@
             <img height="1" width="1" style="display: none;" src="https://www.facebook.com/tr?id={{{$pixel->code}}}&ev=PageView&noscript=1" />
         </noscript>
         <!-- End Facebook Pixel Code -->
-        @endforeach 
-        
+        @endforeach
+
         @foreach($gtm_code as $gtm)
         <!-- Google tag (gtag.js) -->
         <script>
@@ -77,7 +77,7 @@
                         <div class="coupon-code">
                             <p>Get {{$coupon->amount}} {{$coupon->type == 1 ? "%" : "Tk"}} Discount use the coupon code <span id="couponCode">{{$coupon->coupon_code}}</span>
                             <button onclick="copyCouponCode()"> <i class="fas fa-copy"></i>
-                            </button></p> 
+                            </button></p>
                         </div>
                     </div>
                 </div>
@@ -258,7 +258,7 @@
                                         @foreach ($categories as $category)
                                         <li>
                                             <a href="{{route('category',$category->slug)}}">
-                                                {{$category->name}}   
+                                                {{$category->name}}
                                                 @if ($category->subcategories->count() > 0)
                                                     <i class="fa-solid fa-angle-down cat_down"></i>
                                                 @endif
@@ -406,7 +406,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-       
+
         <script src="{{asset('public/backEnd/')}}/assets/js/toastr.min.js"></script>
         {!! Toastr::message() !!} @stack('script')
         <script>
@@ -749,7 +749,7 @@
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-{{$gtm->code}}" height="0" width="0" style="display: none; visibility: hidden;"></iframe></noscript>
         <!-- End Google Tag Manager (noscript) -->
         @endforeach
-        
+
         <script>
             function copyCouponCode() {
                 var couponCode = document.getElementById("couponCode").innerText;
@@ -762,6 +762,6 @@
                 document.body.removeChild(tempInput);
                 toastr.success('Coupon Code copied successfully!');
             }
-        </script>   
+        </script>
     </body>
 </html>
