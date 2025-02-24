@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Models\Customer;
 use App\Models\OrderStatus;
 use App\Models\Order;
@@ -25,8 +27,6 @@ use App\Models\ExpenseCategories;
 use App\Models\ProductVariable;
 use App\Models\PurchaseDetails;
 use App\Models\District;
-use Illuminate\Support\Facades\DB;
-use Gloudemans\Shoppingcart\Facades\Cart;
 
 class OrderController extends Controller
 {
@@ -64,7 +64,7 @@ class OrderController extends Controller
                 $product_size = $var_product->size ?? null;
                 $product_color = $var_product->color ?? null;
 
-                $cartitem = Cart::instance('pos_shopping')->content()->where('id', $product_id)->first();
+                $cartitem = Cart::instance('sale')->content()->where('id', $product_id)->first();
                 $cart_qty = $cartitem ? $cartitem->qty + $qty : $qty;
 
                 if ($stock < $cart_qty) {
@@ -72,7 +72,7 @@ class OrderController extends Controller
                     return response()->json(['status' => 'limitover', 'message' => 'Your stock limit is over']);
                 }
 
-                $cartinfo = Cart::instance('pos_shopping')->add([
+                $cartinfo = Cart::instance('sale')->add([
                     'id' => $product_id,
                     'name' => $product_name,
                     'qty' => $qty,
@@ -174,7 +174,6 @@ class OrderController extends Controller
                 });
             }
             $show_data = $show_data->paginate(50);
-
         } else {
             $order_status = OrderStatus::where('slug', $slug)->withCount('orders')->first();
             $show_data = Order::where(['order_status' => $order_status->id])
@@ -245,24 +244,24 @@ class OrderController extends Controller
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ])->post($pathao_info->url . '/api/v1/orders', [
-                        'store_id' => $request->pathaostore,
-                        'merchant_order_id' => $order->invoice_id,
-                        'sender_name' => 'Test',
-                        'sender_phone' => $order->shipping ? $order->shipping->phone : '',
-                        'recipient_name' => $order->shipping ? $order->shipping->name : '',
-                        'recipient_phone' => $order->shipping ? $order->shipping->phone : '',
-                        'recipient_address' => $order->shipping ? $order->shipping->address : '',
-                        'recipient_city' => $request->pathaocity,
-                        'recipient_zone' => $request->pathaozone,
-                        'recipient_area' => $request->pathaoarea,
-                        'delivery_type' => 48,
-                        'item_type' => 2,
-                        'special_instruction' => 'Special note- product must be check after delivery',
-                        'item_quantity' => $order_count,
-                        'item_weight' => 0.5,
-                        'amount_to_collect' => round($order->amount),
-                        'item_description' => 'Special note- product must be check after delivery',
-                    ]);
+                'store_id' => $request->pathaostore,
+                'merchant_order_id' => $order->invoice_id,
+                'sender_name' => 'Test',
+                'sender_phone' => $order->shipping ? $order->shipping->phone : '',
+                'recipient_name' => $order->shipping ? $order->shipping->name : '',
+                'recipient_phone' => $order->shipping ? $order->shipping->phone : '',
+                'recipient_address' => $order->shipping ? $order->shipping->address : '',
+                'recipient_city' => $request->pathaocity,
+                'recipient_zone' => $request->pathaozone,
+                'recipient_area' => $request->pathaoarea,
+                'delivery_type' => 48,
+                'item_type' => 2,
+                'special_instruction' => 'Special note- product must be check after delivery',
+                'item_quantity' => $order_count,
+                'item_weight' => 0.5,
+                'amount_to_collect' => round($order->amount),
+                'item_description' => 'Special note- product must be check after delivery',
+            ]);
         }
         if ($response->status() == '200') {
             $order->order_status = 5;
@@ -400,7 +399,7 @@ class OrderController extends Controller
                 $orders_details = OrderDetails::where('order_id', $order->id)->get();
 
                 foreach ($orders_details as $order_detail) {
-                   
+
                     if ($order_detail->product_type == 1) {
                         $product = Product::find($order_detail->product_id);
                         $product->stock -= $order_detail->qty;
@@ -441,29 +440,28 @@ class OrderController extends Controller
             foreach ($orders_id as $order_id) {
                 $order = Order::find($order_id);
                 $courier = $order->order_status;
-                if ($request->status == 5 && $courier != 5) {
+                if ($courier != 5) {
                     $consignmentData = [
                         'invoice' => $order->invoice_id,
-                        'recipient_name' => $order->shipping ? $order->shipping->name : 'InboxHat',
-                        'recipient_phone' => $order->shipping ? $order->shipping->phone : '01750578495',
-                        'recipient_address' => $order->shipping ? $order->shipping->address : '01750578495',
+                        'recipient_name' => $order->shipping ? $order->shipping->name : '',
+                        'recipient_phone' => $order->shipping ? $order->shipping->phone : '',
+                        'recipient_address' => $order->shipping ? $order->shipping->address : '',
                         'cod_amount' => $order->amount
                     ];
                     $client = new Client();
-                    $response = $client->post('$courier_info->url', [
+                    $response = $client->post($courier_info->url, [
                         'json' => $consignmentData,
                         'headers' => [
-                            'Api-Key' => '$courier_info->api_key',
-                            'Secret-Key' => '$courier_info->secret_key',
+                            'Api-Key' => $courier_info->api_key,
+                            'Secret-Key' => $courier_info->secret_key,
                             'Accept' => 'application/json',
                         ],
                     ]);
-
                     $responseData = json_decode($response->getBody(), true);
                     if ($responseData['status'] == 200) {
                         $message = 'Your order place to courier successfully';
                         $status = 'success';
-                        $order->order_status = 4;
+                        $order->order_status = 5;
                         $order->save();
                     } else {
                         $message = 'Your order place to courier failed';
@@ -471,12 +469,14 @@ class OrderController extends Controller
                     }
                     return response()->json(['status' => $status, 'message' => $message]);
                 }
+                
             }
-        }
+        } 
     }
-    public function order_create(){
+    public function order_create()
+    {
         $products = Product::select('id', 'name', 'new_price', 'type', 'status')->get();
-        $cartinfo = Cart::instance('pos_shopping')->content();
+        $cartinfo = Cart::instance('sale')->content();
         $shippingcharge = Shippingcharge::get();
         Session::put('pos_shipping');
         Session::forget('pos_discount');
@@ -486,45 +486,44 @@ class OrderController extends Controller
         return view('backEnd.order.create', compact('products', 'cartinfo', 'shippingcharge'));
     }
 
-    public function order_store(Request $request){
+    public function order_store(Request $request)
+    {
         // return $request->all();
-         if($request->guest_customer){
-            $this->validate($request,[
-            'guest_customer'=>'required',
+        if ($request->guest_customer) {
+            $this->validate($request, [
+                'guest_customer' => 'required',
             ]);
             $customer = Customer::find($request->guest_customer);
 
-            $area = ShippingCharge::where('pos',1)->first();
+            $area = ShippingCharge::where('pos', 1)->first();
             $name = $customer->name;
             $phone = $customer->phone;
             $address = $area->name;
             $area = $area->id;
-
-        }else{
-          $this->validate($request,[
-            'name'=>'required',
-            'phone'=>'required',
-            'address'=>'required',
-            'area'=>'required',
-            ]);  
+        } else {
+            $this->validate($request, [
+                'name' => 'required',
+                'phone' => 'required',
+                'address' => 'required',
+                'area' => 'required',
+            ]);
             $name = $request->name;
             $phone = $request->phone;
             $address = $request->address;
             $area = $request->area;
         }
 
-        if (Cart::instance('pos_shopping')->count() <= 0) {
+        if (Cart::instance('sale')->count() <= 0) {
             Toastr::error('Your shopping empty', 'Failed!');
             return redirect()->back();
         }
 
-        $subtotal = Cart::instance('pos_shopping')->subtotal();
+        $subtotal = Cart::instance('sale')->subtotal();
         $subtotal = str_replace(',', '', $subtotal);
         $subtotal = str_replace('.00', '', $subtotal);
         $discount = Session::get('pos_discount') + Session::get('product_discount');
 
-        $shipping_area = District::where('id', $request->area)->first();
-        $shippingfee = $shipping_area->shippingfee ?? 0;
+        $shipping_area = ShippingCharge::where('id', $area)->first();
 
         $exits_customer = Customer::where('phone', $phone)->select('phone', 'id')->first();
         if ($exits_customer) {
@@ -541,21 +540,21 @@ class OrderController extends Controller
             $store->save();
             $customer_id = $store->id;
         }
-        
+
         $customer = Customer::find($customer_id);
 
         // order data save
         $order = new Order();
         $order->invoice_id = rand(11111, 99999);
-        $order->amount = ($subtotal + $shippingfee) - $discount;
+        $order->amount = ($subtotal + $shipping_area->amount) - $discount;
         $order->discount = $discount ? $discount : 0;
-        $order->shipping_charge = $shippingfee;
+        $order->shipping_charge = $shipping_area->amount;
         $order->customer_id = $customer_id;
-        $order->order_status = "pending";
+        $order->order_status = 1;
         $order->user_id = Auth::user()->id;
         $order->note = $request->note;
         $order->save();
-        
+
         // shipping data save
         $shipping = new Shipping();
         $shipping->order_id = $order->id;
@@ -563,7 +562,7 @@ class OrderController extends Controller
         $shipping->name = $name;
         $shipping->phone = $phone;
         $shipping->address = $address;
-        $shipping->area = $request->area ? $shipping_area->area_name : 'Free Shipping';
+        $shipping->area = $request->area ? $shipping_area->name : 'Free Shipping';
         $shipping->save();
 
         // payment data save
@@ -576,7 +575,7 @@ class OrderController extends Controller
         $payment->save();
 
         // order details data save
-        foreach (Cart::instance('pos_shopping')->content() as $cart) {
+        foreach (Cart::instance('sale')->content() as $cart) {
             // return $cart;
             $order_details = new OrderDetails();
             $order_details->order_id = $order->id;
@@ -592,17 +591,17 @@ class OrderController extends Controller
             $order_details->save();
             // return  $order_details;
             if ($order_details->product_type == 1) {
-                    $product = Product::find($order_details->product_id);
-                    $product->stock -= $order_details->qty;
-                    $product->save();
-                } else {
-                    $product = ProductVariable::where(['product_id' => $order_details->product_id, 'color' => $order_details->product_color, 'size' => $order_details->product_size])->first();
-                    $product->stock -= $order_details->qty;
-                    $product->save();
-                }
+                $product = Product::find($order_details->product_id);
+                $product->stock -= $order_details->qty;
+                $product->save();
+            } else {
+                $product = ProductVariable::where(['product_id' => $order_details->product_id])->orWhere('color',$order_details->product_color)->first();
+                $product->stock -= $order_details->qty;
+                $product->save();
+            }
         }
-        Cart::instance('pos_shopping')->destroy();
-        Session::forget('pos_shipping');
+        Cart::instance('sale')->destroy();
+        Session::forget('sale');
         Session::forget('pos_discount');
         Session::forget('product_discount');
         Session::forget('cpaid');
@@ -629,7 +628,7 @@ class OrderController extends Controller
 
         $qty = 1;
 
-        $cartitem = Cart::instance('pos_shopping')->content()->where('id', $product->id)->first();
+        $cartitem = Cart::instance('sale')->content()->where('id', $product->id)->first();
         if ($cartitem) {
             $cart_qty = $cartitem->qty + $qty;
         } else {
@@ -639,7 +638,7 @@ class OrderController extends Controller
             Toastr::error('Product stock limit over', 'Failed!');
             return response()->json(['status' => 'limitover', 'message' => 'Your stock limit is over']);
         }
-        $cartinfo = Cart::instance('pos_shopping')->add([
+        $cartinfo = Cart::instance('sale')->add([
             'id' => $product->id,
             'name' => $product->name,
             'qty' => $qty,
@@ -655,17 +654,17 @@ class OrderController extends Controller
                 'type' => $product->type
             ],
         ]);
-        //  return Cart::instance('pos_shopping')->content();
+        //  return Cart::instance('sale')->content();
         return response()->json(compact('cartinfo'));
     }
     public function cart_content()
     {
-        $cartinfo = Cart::instance('pos_shopping')->content();
+        $cartinfo = Cart::instance('sale')->content();
         return view('backEnd.order.cart_content', compact('cartinfo'));
     }
     public function cart_details()
     {
-        $cartinfo = Cart::instance('pos_shopping')->content();
+        $cartinfo = Cart::instance('sale')->content();
         $discount = 0;
         foreach ($cartinfo as $cart) {
             $discount += $cart->options->product_discount * $cart->qty;
@@ -676,72 +675,74 @@ class OrderController extends Controller
     public function cart_increment(Request $request)
     {
         $qty = $request->qty + 1;
-        $cartinfo = Cart::instance('pos_shopping')->update($request->id, $qty);
+        $cartinfo = Cart::instance('sale')->update($request->id, $qty);
         return response()->json($cartinfo);
     }
     public function cart_decrement(Request $request)
     {
         $qty = $request->qty - 1;
-        $cartinfo = Cart::instance('pos_shopping')->update($request->id, $qty);
+        $cartinfo = Cart::instance('sale')->update($request->id, $qty);
         return response()->json($cartinfo);
     }
     public function cart_remove(Request $request)
     {
-        $remove = Cart::instance('pos_shopping')->remove($request->id);
-        $cartinfo = Cart::instance('pos_shopping')->content();
+        $remove = Cart::instance('sale')->remove($request->id);
+        $cartinfo = Cart::instance('sale')->content();
         return response()->json($cartinfo);
     }
     public function product_discount(Request $request)
     {
         $discount = $request->discount;
-        $cart = Cart::instance('pos_shopping')->content()->where('rowId', $request->id)->first();
-        $cartinfo = Cart::instance('pos_shopping')->update($request->id, [
+        $cart = Cart::instance('sale')->content()->where('rowId', $request->id)->first();
+        $cartinfo = Cart::instance('sale')->update($request->id, [
             'options' => [
-                'slug' => $cart->options->slug,
+                'slug' => $cart->slug,
                 'image' => $cart->options->image,
-                'old_price' => $cart->options->old_price,
+                'purchase_price' => $cart->options->old_price,
                 'purchase_price' => $cart->options->purchase_price,
+                'product_size' => $cart->options->size,
+                'product_color' => $cart->options->color,
                 'product_discount' => $request->discount,
+                'type' => $cart->options->type,
                 'details_id' => $cart->options->details_id
             ],
         ]);
         return response()->json($cartinfo);
     }
     public function cart_shipping(Request $request)
-    { 
-        $shipping = ShippingCharge::where(['status'=>1,'id'=>$request->id])->first()->amount;
+    {
+        $shipping = ShippingCharge::where(['status' => 1, 'id' => $request->id])->first()->amount;
         Session::put('pos_shipping', $shipping);
         return response()->json($shipping);
     }
 
-
     public function cart_clear(Request $request)
     {
-        $cartinfo = Cart::instance('pos_shopping')->destroy();
+        $cartinfo = Cart::instance('sale')->destroy();
         Session::forget('pos_shipping');
         Session::forget('pos_discount');
         Session::forget('product_discount');
+        Toastr::error('Your shopping empty', 'Failed!');
         return redirect()->back();
     }
 
-    public function order_edit($invoice_id)
-    {
+    public function order_edit($invoice_id){
         $data = Order::where(['invoice_id' => $invoice_id])->select('id', 'invoice_id', 'order_status', 'order_type')->with('orderdetails', 'shipping')->first();
         $products = Product::select('id', 'name', 'new_price')->where(['status' => 1])->get();
         $shippingcharge = Shippingcharge::get();
         $order = Order::where('invoice_id', $invoice_id)->first();
-        $cartinfo = Cart::instance('pos_shopping')->destroy();
+        $cartinfo = Cart::instance('sale')->destroy();
         $shippinginfo = Shipping::where('order_id', $order->id)->first();
         Session::put('product_discount', $order->discount);
         Session::put('pos_shipping', $order->shipping_charge);
         $orderdetails = OrderDetails::where('order_id', $order->id)->get();
         foreach ($orderdetails as $ordetails) {
-            $cartinfo = Cart::instance('pos_shopping')->add([
+            $cartinfo = Cart::instance('sale')->add([
                 'id' => $ordetails->product_id,
                 'name' => $ordetails->product_name,
                 'qty' => $ordetails->qty,
                 'price' => $ordetails->sale_price,
-                'weight' => $ordetails->weight??1,
+                'weight' => $ordetails->weight ?? 1,
                 'options' => [
                     'image' => $ordetails->image->image,
                     'purchase_price' => $ordetails->purchase_price,
@@ -753,7 +754,7 @@ class OrderController extends Controller
                 ],
             ]);
         }
-        $cartinfo = Cart::instance('pos_shopping')->content();
+        $cartinfo = Cart::instance('sale')->content();
         return view('backEnd.order.edit', compact('products', 'cartinfo', 'shippingcharge', 'shippinginfo', 'order', 'data'));
     }
 
@@ -764,19 +765,16 @@ class OrderController extends Controller
             'phone' => 'required',
         ]);
 
-        if (Cart::instance('pos_shopping')->count() <= 0) {
+        if (Cart::instance('sale')->count() <= 0) {
             Toastr::error('Your shopping empty', 'Failed!');
             return redirect()->back();
         }
 
-        $subtotal = Cart::instance('pos_shopping')->subtotal();
+        $subtotal = Cart::instance('sale')->subtotal();
         $subtotal = str_replace(',', '', $subtotal);
         $subtotal = str_replace('.00', '', $subtotal);
         $discount = Session::get('pos_discount') + Session::get('product_discount');
         $shipping_area = Shippingcharge::where('id', $request->area)->first();
-        $shippingfee = $shipping_area->shippingfee ?? 0;
-
-
         $exits_customer = Customer::where('phone', $request->phone)->select('phone', 'id')->first();
         if ($exits_customer) {
             $customer_id = $exits_customer->id;
@@ -795,14 +793,10 @@ class OrderController extends Controller
 
         // order data save
         $order = Order::where('id', $request->order_id)->first();
-        $order->amount = ($subtotal + $shippingfee) - $discount;
+        $order->amount = ($subtotal + $shipping_area->amount) - $discount;
         $order->discount = $discount ? $discount : 0;
-        $order->shipping_charge = $shippingfee;
+        $order->shipping_charge = $shipping_area->amount;
         $order->customer_id = $customer_id;
-        $order->paid = $request->paid;
-        $order->due = $order->amount - $request->paid;
-        $order->order_status = 6;
-        $order->order_stype = $request->order_stype;
         $order->note = $request->note;
         $order->save();
 
@@ -814,8 +808,7 @@ class OrderController extends Controller
         $shipping->name = $request->name;
         $shipping->phone = $request->phone;
         $shipping->address = $request->address;
-        $shipping->district = $request->district;
-        $shipping->area = $request->area ? $shipping_area->area_name : 'Free Shipping';
+        $shipping->area = $request->area ? $shipping_area->name : 'Free Shipping';
         $shipping->save();
 
         // payment data save
@@ -829,12 +822,12 @@ class OrderController extends Controller
 
         // order details data save
         foreach ($order->orderdetails as $orderdetail) {
-            $item = Cart::instance('pos_shopping')->content()->where('id', $orderdetail->product_id)->first();
+            $item = Cart::instance('sale')->content()->where('id', $orderdetail->product_id)->first();
             if (!$item) {
                 $orderdetail->delete();
             }
         }
-        foreach (Cart::instance('pos_shopping')->content() as $cart) {
+        foreach (Cart::instance('sale')->content() as $cart) {
             $exits = OrderDetails::where('id', $cart->options->details_id)->first();
             if ($exits) {
                 $order_details = OrderDetails::find($exits->id);
@@ -854,7 +847,7 @@ class OrderController extends Controller
                 $order_details->save();
             }
         }
-        Cart::instance('pos_shopping')->destroy();
+        Cart::instance('sale')->destroy();
         Session::forget('pos_shipping');
         Session::forget('pos_discount');
         Session::forget('product_discount');
@@ -863,9 +856,10 @@ class OrderController extends Controller
         return redirect('admin/order/pending');
     }
 
-    public function purchase_report(){   
+    public function purchase_report()
+    {
         $purchase = PurchaseDetails::with('product')->latest()->paginate(100);
-        return view('backEnd.reports.purchase',compact('purchase'));
+        return view('backEnd.reports.purchase', compact('purchase'));
     }
     public function order_report(Request $request)
     {
@@ -940,8 +934,9 @@ class OrderController extends Controller
             $data = $data->whereBetween('created_at', [$request->start_date, $request->end_date]);
         }
         $data = $data->paginate(10);
-        $categories = ExpenseCategories::where('status', 1)->get();
-        return view('backEnd.reports.expense', compact('data', 'categories'));
+        $expensecategories = ExpenseCategories::where('status', 1)->get();
+        // return $expensecategories;
+        return view('backEnd.reports.expense', compact('data', 'expensecategories'));
     }
     public function loss_profit(Request $request)
     {
@@ -972,14 +967,54 @@ class OrderController extends Controller
 
     public function order_paid(Request $request)
     {
-        $customer = Customer::select('id','phone','due')->where('phone',$request->phone)->first();
-        if($customer){
-            Session::put('cdue',$customer->due);
+        $customer = Customer::select('id', 'phone', 'due')->where('phone', $request->phone)->first();
+        if ($customer) {
+            Session::put('cdue', $customer->due);
         }
         $amount = $request->amount;
         Session::put('cpaid', $amount);
         return response()->json($amount);
     }
-
-
+     public function fraud_checker(Request $request){
+        
+        $shipping = Shipping::where('order_id',$request->id)->first();
+        $headers = [
+            'email' => 'zadumia441@gmail.com',
+            'api_key' => 'JQAGMXHUUNPAAA5W',
+        ];
+        $body = [
+            'phone' => $shipping->phone,
+        ];
+        $response = Http::withHeaders($headers)
+            ->post('https://fraudchecker.websolutionit.com/api/v1/fraud-checker', $body);
+        $result = $response->json();
+        
+        $name = $result['name'] ?? 'N/A';
+        $name = $result['name'] ?? 'N/A';
+        $phone = $shipping->phone ?? 'N/A';
+        $steadfast_total = $result['steadfast_total'] ?? 0;
+        $steadfast_success = $result['steadfast_success'] ?? 0;
+        $steadfast_cancel = $result['steadfast_cancel'] ?? 0;
+        $pathao_total = $result['pathao_total'] ?? 0;
+        $pathao_success = $result['pathao_success'] ?? 0;
+        $pathao_cancel = $result['pathao_cancel'] ?? 0;
+        $redx_total = $result['redx_total'] ?? 0;
+        $redx_success = $result['redx_success'] ?? 0;
+        $redx_cancel = $result['redx_cancel'] ?? 0;
+        $paperfly_total = $result['paperfly_total'] ?? 0;
+        $paperfly_success = $result['paperfly_success'] ?? 0;
+        $paperfly_cancel = $result['paperfly_cancel'] ?? 0;
+        $total_parcel = $result['total_parcel'] ?? 0;
+        $total_success = $result['total_success'] ?? 0;
+        $total_cancel = $result['total_cancel'] ?? 0;
+        $status = $result['status'] ?? 0;
+        return view('backEnd.order.fraud_checker', compact(
+            'status','name', 'phone', 
+            'steadfast_total', 'steadfast_success', 'steadfast_cancel',
+            'pathao_total', 'pathao_success', 'pathao_cancel',
+            'redx_total', 'redx_success', 'redx_cancel',
+            'paperfly_total', 'paperfly_success', 'paperfly_cancel',
+            'total_parcel', 'total_success', 'total_cancel'
+        ));
+     }
 }

@@ -67,7 +67,7 @@
                                     <select class="form-control select2 @error('category_id') is-invalid @enderror"
                                         name="category_id" value="{{ old('category_id') }}">
                                         <option value="">Select..</option>
-                                        @foreach ($categories as $category)
+                                        @foreach ($expensecategories as $category)
                                             <option value="{{ $category->id }}"
                                                 @if (request()->get('category_id') == $category->id) selected @endif>{{ $category->name }}
                                             </option>

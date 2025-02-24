@@ -58,15 +58,15 @@
                 <div class="col-sm-6">
                     <button onclick="printFunction()"class="no-print btn btn-xs btn-success waves-effect waves-light"><i
                             class="fa fa-print"></i></button>
-                </div>
+                </div> 
                 <div class="col-sm-12 mt-3">
                     <div class="invoice-innter"
                         style="width:760px;margin: 0 auto;background: #fff;overflow: hidden;padding: 30px;padding-top: 0;">
                         <table style="width:100%">
                             <tr>
                                 <td style="width: 40%; float: left; padding-top: 15px;">
-                                    <img src="{{ asset($generalsetting->white_logo) }}" width="190px"
-                                        style="margin-top:25px !important" alt="">
+                                    <img src="{{ asset($generalsetting->dark_logo) }}"
+                                        style="margin-top:25px !important;width:160px" alt="">
                                     <p style="font-size: 14px; margin-top:15px; color: #222;"><strong>Payment
                                             Method:</strong> <span
                                             style="text-transform: uppercase;">{{ $order->payment ? $order->payment->payment_method : '' }}</span>

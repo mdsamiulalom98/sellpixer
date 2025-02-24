@@ -22,6 +22,17 @@
         object-fit: contain;
         pointer-events: none;
     }
+    .mobile-header.fixed-top {
+        top: -40px;
+        transform: translateY(40px);
+        transition: transform 1s;
+        background: var(--secondary-color-extra);
+    }
+    .mobile-header.fixed-top {
+        top: -40px;
+        transform: translateY(40px);
+        transition: transform 1s;
+    }
     .checkout-shipping .card-header {
         padding: 15px;
     }
@@ -550,8 +561,9 @@
         margin-top: -8px;
     }
 
-    .fixed-top .mobile-logo {
+    .fixed-top .mobile-logo i {
         margin-bottom: 0px;
+        color: #fff !important;
     }
 
    .menu-logo img {

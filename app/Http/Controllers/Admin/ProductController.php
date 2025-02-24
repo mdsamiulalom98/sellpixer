@@ -420,13 +420,14 @@ class ProductController extends Controller
     }
     public function purchase_store(Request $request)
     {
-        if($request->type == 1){
-            $product = Product::select('id', 'name','slug', 'status', 'pro_barcode', 'new_price', 'type')->where('id', $request->product_id)->first();
+        $product = Product::select('id', 'name','old_price', 'status', 'purchase_price', 'new_price', 'type')->where('id', $request->product_id)->first();
+        if($product){
+            $product = Product::select('id', 'name','old_price', 'status', 'purchase_price', 'new_price', 'type')->where('id', $request->product_id)->first();
             $product->stock =+ $request->qty;
             $product->save();
 
             $parchase                   = new PurchaseDetails();
-            $parchase->product_id       = $product->product_id;
+            $parchase->product_id       = $product->id;
             $parchase->purchase_price   = $product->purchase_price;
             $parchase->old_price        = $product->old_price;
             $parchase->new_price        = $product->new_price;

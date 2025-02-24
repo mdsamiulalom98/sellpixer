@@ -181,7 +181,20 @@
                                 </div>
                             </div>
                             <!-- col end -->
-
+                            <div class="col-sm-12 mb-3">
+                                <div class="form-group mb-3">
+                                    <label for="template" class="form-label">Campaign Template</label>
+                                    <select name="template" class="form-control">
+                                        <option value="1" {{$edit_data->template == 1 ? 'selected':''}}>Template 1</option>
+                                        <option value="2" {{$edit_data->template == 2 ? 'selected':''}}>Template 2</option>
+                                    </select>
+                                    @error('template')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
                             <div class="col-sm-6 mb-3">
                                 <div class="form-group">
                                     <label for="status" class="d-block">Status</label>

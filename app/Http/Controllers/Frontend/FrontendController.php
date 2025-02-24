@@ -194,7 +194,7 @@ class FrontendController extends Controller
 
         $details = Product::where(['slug' => $slug, 'status' => 1])
             ->with('image', 'images', 'category', 'subcategory', 'childcategory')
-            ->withCount('variableimages')
+            ->withCount('variable')
             ->firstOrFail();
 
         $products = Product::where(['category_id' => $details->category_id, 'status' => 1])
@@ -282,7 +282,11 @@ class FrontendController extends Controller
             Session::put('shipping', 0);
         } else {
            $shipping = ShippingCharge::where(['id' => $request->id])->first();
-        Session::put('shipping', $shipping->amount);
+            Session::put('shipping', $shipping->amount);
+        }
+        if($request->campaign == 1){
+            $data = Cart::instance('shopping')->content();
+            return view('frontEnd.layouts.ajax.cart_camp', compact('data'));
         }
         return view('frontEnd.layouts.ajax.cart');
     }
@@ -303,13 +307,10 @@ class FrontendController extends Controller
         $areas = District::where(['district' => $request->id])->pluck('area_name', 'id');
         return response()->json($areas);
     }
-    public function campaign($slug, Request $request)
-    {
+    public function campaign($slug, Request $request){
 
         $campaign = Campaign::where('slug', $slug)->with('images')->first();
-
         $product = Product::select('id', 'name', 'slug', 'new_price', 'old_price', 'purchase_price', 'type', 'stock')->where(['id' => $campaign->product_id])->first();
-        // return $product;
         $productcolors = ProductVariable::where('product_id', $campaign->product_id)->where('stock', '>', 0)
             ->whereNotNull('color')
             ->select('color')
@@ -323,7 +324,6 @@ class FrontendController extends Controller
             ->get();
 
         Cart::instance('shopping')->destroy();
-
 
         $var_product = ProductVariable::where(['product_id' => $campaign->product_id])->first();
         if ($product->type == 0) {
@@ -345,6 +345,7 @@ class FrontendController extends Controller
             'id' => $product->id,
             'name' => $product->name,
             'qty' => $qty,
+            'weight' => 1,
             'price' => $new_price,
             'options' => [
                 'slug' => $product->slug,
@@ -359,7 +360,9 @@ class FrontendController extends Controller
         $shippingcharge = ShippingCharge::where('status', 1)->get();
         $select_charge = ShippingCharge::where('status', 1)->first();
         Session::put('shipping', $select_charge->amount);
-        return view('frontEnd.layouts.pages.campaign.campaign', compact('campaign', 'productsizes', 'productcolors', 'shippingcharge', 'old_price', 'new_price'));
+        return view('frontEnd.layouts.pages.campaign.campaign'.$campaign->template, compact('campaign', 'productsizes', 'productcolors', 'shippingcharge', 'old_price', 'new_price'));
+  
+       
     }
     public function campaign_stock(Request $request)
     {
@@ -370,13 +373,12 @@ class FrontendController extends Controller
         $status = $variable ? true : false;
 
         if ($status == true) {
-            // return $variable;
-            // return "wait";
             Cart::instance('shopping')->destroy();
             Cart::instance('shopping')->add([
                 'id' => $product->id,
                 'name' => $product->name,
                 'qty' => $qty,
+                'weight' => 1,
                 'price' => $variable->new_price,
                 'options' => [
                     'slug' => $product->slug,

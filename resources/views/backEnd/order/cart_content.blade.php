@@ -131,7 +131,7 @@
             url: "{{route('admin.order.cart_shipping')}}",
             dataType: "html",
             success: function(cartinfo){
-               return cart_content()+cart_details();
+            //   return cart_content()+cart_details();
             }
         });
     });

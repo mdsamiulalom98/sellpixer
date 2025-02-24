@@ -53,7 +53,6 @@ class ChildcategoryController extends Controller
         
         Childcategory::create($input);
         Toastr::success('Success','Data insert successfully');
-        return back();
         return redirect()->route('childcategories.index');
     }
     
@@ -102,8 +101,30 @@ class ChildcategoryController extends Controller
     }
     public function destroy(Request $request)
     {
-        $delete_data = Childcategory::find($request->hidden_id);
-        $delete_data->delete();
+
+        $childcategory = Childcategory::find($request->hidden_id);
+        foreach ($childcategory->products ?? [] as $product) {
+            foreach ($product->variables ?? [] as $variable) {
+                File::delete($variable->image);
+                $variable->delete();
+            }
+            foreach ($product->images ?? [] as $image) {
+                File::delete($image->image);
+                $image->delete();
+            }
+            foreach ($product->reviews ?? [] as $review) {
+                $review->delete();
+            }
+            foreach ($product->campaigns ?? [] as $campaign) {
+                File::delete($product->banner);
+                $campaign->delete();
+            }
+            File::delete($product->image);
+            $product->delete();
+        }
+        File::delete($childcategory->image);
+        $childcategory->delete();
+
         Toastr::success('Success','Data delete successfully');
         return redirect()->back();
     }

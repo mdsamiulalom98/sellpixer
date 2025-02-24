@@ -319,12 +319,7 @@ class CustomerController extends Controller
         $select_charge = ShippingCharge::where(['status' => 1, 'website' => 1])->first();
         $bkash_gateway = PaymentGateway::where(['status' => 1, 'type' => 'bkash'])->first();
         $shurjopay_gateway = PaymentGateway::where(['status' => 1, 'type' => 'shurjopay'])->first();
-        
-        if (Session::get('free_shipping') == 1) {
-            Session::put('shipping', 0);
-        } else {
-            Session::put('shipping', $select_charge->amount);
-        }
+        Session::put('shipping', $select_charge->amount);
         $districts = District::distinct()->select('district')->orderBy('district', 'asc')->get();
         return view('frontEnd.layouts.customer.checkout', compact('shippingcharge', 'bkash_gateway','shurjopay_gateway', 'districts'));
     }
@@ -351,9 +346,6 @@ class CustomerController extends Controller
         $subtotal = str_replace(',', '', $subtotal);
         $subtotal = str_replace('.00', '', $subtotal);
         $discount = Session::get('discount') + Session::get('coupon_amount');
-        $shippingfee  = Session::get('free_shipping') ? 0 : Session::get('shipping');
-        $amount = ($subtotal + $shippingfee) - $discount;
-
         $shipping_area  = ShippingCharge::where('id', $request->area)->first();
         if (Auth::guard('customer')->user()) {
             $customer_id = Auth::guard('customer')->user()->id;
@@ -377,9 +369,9 @@ class CustomerController extends Controller
         // order data save
         $order                   = new Order();
         $order->invoice_id       = rand(11111, 99999);
-        $order->amount           = $amount;
+        $order->amount           = ($subtotal + $shipping_area->amount) - $discount;
         $order->discount         = $discount ? $discount : 0;
-        $order->shipping_charge  = $shippingfee;
+        $order->shipping_charge = $shipping_area->amount;
         $order->customer_id      = $customer_id;
         $order->customer_ip      = $request->ip();
         $order->order_type       = Session::get('free_shipping') ? 'digital' : 'goods';
@@ -437,7 +429,7 @@ class CustomerController extends Controller
                 "number" => $request->phone,
                 "type" => 'text',
                 "senderid" => "$sms_gateway->serderid",
-                "message" => "Dear $request->name!\r\nYour order ($order->invoice_id) has been successfully placed. Track your order https://shoppingghor.com/customer/order-track and Total Bill $order->amount\r\nThank you for using $site_setting->name"
+                "message" => "Dear $request->name!\r\nYour order ($order->invoice_id) has been successfully placed. Track your order https://sellpixer.websolutionit.com/customer/order-track and Total Bill $order->amount\r\nThank you for using $site_setting->name"
             ];
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);

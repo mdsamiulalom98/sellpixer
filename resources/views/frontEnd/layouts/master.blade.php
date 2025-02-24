@@ -20,8 +20,8 @@
         <!-- toastr css -->
         <link rel="stylesheet" href="{{asset('public/backEnd/')}}/assets/css/toastr.min.css" />
         <link rel="stylesheet" href="{{asset('public/frontEnd/css/wsit-menu.css')}}" />
-        <link rel="stylesheet" href="{{asset('public/frontEnd/css/style.css?v=1.0.0')}}" />
-        <link rel="stylesheet" href="{{asset('public/frontEnd/css/responsive.css?v=1.0.0')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/style.css?v=1.0.1')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/responsive.css?v=1.0.1')}}" />
         <script src="{{asset('public/frontEnd/js/jquery-3.7.1.min.js')}}"></script>
         @foreach($pixels as $pixel)
         <!-- Facebook Pixel Code -->
@@ -188,7 +188,7 @@
                                     <div class="main-search">
                                         <form action="{{route('search')}}">
                                             <button><i data-feather="search"></i></button>
-                                            <input type="text" placeholder="Search Product..." class="search_keyword search_click" name="keyword" />
+                                            <input type="text" placeholder="Search Product..." class="msearch_keyword msearch_click" name="keyword" />
                                         </form>
                                         <div class="search_result"></div>
                                     </div>
@@ -232,7 +232,7 @@
                                                         <li>Qty: {{$value->qty}}</li>
                                                         <li>
                                                             <p>৳{{$value->price}}</p>
-                                                            <button class="remove-cart cart_remove" data-id="{{$value->rowId}}"><i data-feather="x"></i></button>
+                                                             <button class="remove-cart cart_remove" data-id="{{$value->rowId}}"><i class="fa-regular fa-trash-can trash_icon" title="Delete this item"></i></button>
                                                         </li>
                                                         @endforeach
                                                     </ul>
@@ -694,6 +694,19 @@
                     $("html,body").animate({ scrollTop: $(".gotop").offset().top }, "1000");
                     return false;
                 });
+            });
+        </script>
+        <script>
+            $(window).on('scroll', function() {
+                if ($(this).scrollTop() > 100) {
+                    $('.logo-area').addClass('fixed-top');
+                    $('.mobile-menu').addClass('fixed-top');
+                    $('.mobile-header').addClass('fixed-top');
+                } else {
+                    $('.logo-area').removeClass('fixed-top');
+                    $('.mobile-menu').removeClass('fixed-top');
+                    $('.mobile-header').removeClass('fixed-top');
+                }
             });
         </script>
         <script>

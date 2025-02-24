@@ -19,7 +19,7 @@
     <!-- toastr css -->
     <link rel="stylesheet" href="{{ asset('public/backEnd/') }}/assets/css/toastr.min.css" />
     <!-- custom css -->
-    <link href="{{ asset('public/backEnd/') }}/assets/css/custom.css" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('public/backEnd/') }}/assets/css/custom.css?v=1.0.1" rel="stylesheet" type="text/css" />
     <!-- Head js -->
     @yield('css')
     <script src="{{ asset('public/backEnd/') }}/assets/js/head.js"></script>
@@ -36,17 +36,9 @@
             <div class="container-fluid">
                 <ul class="list-unstyled topnav-menu float-end mb-0">
                     <li class="dropdown d-inline-block d-lg-none">
-                        <a class="nav-link dropdown-toggle arrow-none waves-effect waves-light"
-                            data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false"
-                            aria-expanded="false">
-                            <i class="fe-search noti-icon"></i>
+                        <a  href="{{route('admin.order.create')}}" class="nav-link dropdown-toggle arrow-none waves-effect waves-light">
+                            <i class="fe-shopping-cart noti-icon"></i>
                         </a>
-                        <div class="dropdown-menu dropdown-lg dropdown-menu-end p-0">
-                            <form class="p-3">
-                                <input type="text" class="form-control" placeholder="Search ..."
-                                    aria-label="Recipient's username" />
-                            </form>
-                        </div>
                     </li>
 
                     <li class="dropdown d-none d-lg-inline-block">
@@ -479,6 +471,10 @@
                                     <li>
                                         <a href="{{ route('couponcodes.index') }}"><i data-feather="minus"></i>
                                             Coupon Code</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('admin.send_sms') }}"><i data-feather="minus"></i>
+                                           SMS Marketing</a>
                                     </li>
                                 </ul>
                             </div>

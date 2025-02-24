@@ -71,8 +71,11 @@
                                     @endif
 
                                     <a href="{{route('categories.edit',$value->id)}}" class="btn btn-xs btn-primary waves-effect waves-light"><i class="fe-edit-1"></i></a>
-
-                                    
+                                    <form method="post" action="{{route('categories.destroy',$value->id)}}" class="d-inline">        
+                                        @csrf
+                                        <input type="hidden" value="{{$value->id}}" name="hidden_id">
+                                        <button type="submit" class="btn btn-xs  btn-danger waves-effect waves-light change-confirm" title="Delete"><i class="fe-trash-2"></i></button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

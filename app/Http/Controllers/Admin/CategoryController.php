@@ -129,9 +129,36 @@ class CategoryController extends Controller
     }
     public function destroy(Request $request)
     {
-        $delete_data = Category::find($request->hidden_id);
-        File::delete($delete_data->image);
-        $delete_data->delete();
+        $category = Category::find($request->hidden_id);
+        
+        foreach ($category->subcategories ?? [] as $subcategory) {
+            foreach ($subcategory->childcategories ?? [] as $childCategory) {
+                $childCategory->delete();
+            }
+            File::delete($subcategory->image);
+            $subcategory->delete();
+        }
+        foreach ($category->products ?? [] as $product) {
+            foreach ($product->variables ?? [] as $variable) {
+                File::delete($variable->image);
+                $variable->delete();
+            }
+            foreach ($product->images ?? [] as $image) {
+                File::delete($image->image);
+                $image->delete();
+            }
+            foreach ($product->reviews ?? [] as $review) {
+                $review->delete();
+            }
+            foreach ($product->campaigns ?? [] as $campaign) {
+                File::delete($product->banner);
+                $campaign->delete();
+            }
+            File::delete($product->image);
+            $product->delete();
+        }
+        File::delete($category->image);
+        $category->delete();
         Toastr::success('Success','Data delete successfully');
         return redirect()->back();
     }

@@ -47,7 +47,7 @@
                                         name="category_id" data-toggle="select2" data-placeholder="Choose ...">
                                         <optgroup>
                                             <option value="">Select..</option>
-                                            @foreach ($categories as $value)
+                                            @foreach ($bcategories as $value)
                                                 <option value="{{ $value->id }}"
                                                     @if ($edit_data->category_id == $value->id) selected @endif>{{ $value->name }}
                                                 </option>

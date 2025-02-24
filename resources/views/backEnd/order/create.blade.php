@@ -1,5 +1,5 @@
-@extends('backEnd.layouts.master') 
-@section('title','Order Create') 
+@extends('backEnd.layouts.master')
+@section('title','Order Create')
 @section('css')
 <style>
  .increment_btn,
@@ -65,7 +65,7 @@
          </tr>
         </thead>
         <tbody id="cartTable">
-         @php $product_discount = 0; @endphp 
+         @php $product_discount = 0; @endphp
          @foreach($cartinfo as $key=>$value)
          <tr>
            <td><img height="30" src="{{asset($value->options->image)}}"> <p>{{$value->options->product_size}} <p>{{$value->options->product_color}}</td>
@@ -138,7 +138,7 @@
                    @foreach ($shippingcharge as $key => $value)
                     <option value="{{ $value->id }}">{{ $value->name }}</option>
                    @endforeach
-                    
+
                 </select>
                 @error('area')
                     <span class="invalid-feedback" role="alert">
@@ -154,7 +154,7 @@
       <div class="col-sm-6">
        <table class="table table-bordered">
         <tbody id="cart_details">
-         @php $subtotal = Cart::instance('pos_shopping')->subtotal();
+         @php $subtotal = Cart::instance('sale')->subtotal();
            $subtotal = str_replace(',','',$subtotal); $subtotal = str_replace('.00', '',$subtotal);  $shipping = Session::get('pos_shipping');
            $total_discount = Session::get('pos_discount')+Session::get('product_discount');
          @endphp
@@ -347,7 +347,7 @@
     return cart_content() + cart_details();
    },
   });
- }); 
+ });
 
     $(document).ready(function() {
         $('.search_click').focus();

@@ -29,7 +29,7 @@
                         <form action="{{ route('campaign.store') }}" method="POST" class="row" data-parsley-validate=""
                             enctype="multipart/form-data">
                             @csrf
-                            <div class="col-sm-12">
+                            <div class="col-sm-6">
                                 <div class="form-group mb-3">
                                     <label for="product_id" class="form-label">Products *</label>
                                     <select class="select2 form-control @error('product_id') is-invalid @enderror"
@@ -50,20 +50,6 @@
                                 </div>
                             </div>
                             <!-- col end -->
-                            <div class="col-sm-6">
-                                <div class="form-group mb-3">
-                                    <label for="name" class="form-label">Campaign Title *</label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                        name="name" value="{{ old('name') }}" id="name" required>
-                                    @error('name')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <!-- col-end -->
-
                             <div class="col-sm-6 mb-3">
                                 <div class="form-group">
                                     <label for="banner" class="form-label">Banner Image *</label>
@@ -76,6 +62,32 @@
                                     @enderror
                                 </div>
                             </div>
+                            <div class="col-sm-12">
+                                <div class="form-group mb-3">
+                                    <label for="name" class="form-label">Campaign Title *</label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        name="name" value="{{ old('name') }}" id="name" required>
+                                    @error('name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <!-- col-end -->
+                            <div class="col-sm-12">
+                                <div class="form-group mb-3">
+                                    <label for="sub_title" class="form-label">Sub Title (optional)</label>
+                                    <input type="text" class="form-control @error('sub_title') is-invalid @enderror"
+                                        name="sub_title" value="{{ old('sub_title') }}" id="sub_title">
+                                    @error('sub_title')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <!-- col-end -->
 
                             <div class="col-sm-12 my-3">
                                 <div class="form-group">
@@ -173,7 +185,20 @@
                                 </div>
                             </div>
                             <!-- col-end -->
-
+                            <div class="col-sm-12 mb-3">
+                                <div class="form-group mb-3">
+                                    <label for="template" class="form-label">Campaign Template </label>
+                                    <select name="template" class="form-control">
+                                        <option value="1">Template Design 1</option>
+                                        <option value="2">Template Design 2</option>
+                                    </select>
+                                    @error('template')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
                             <div class="col-sm-12 mb-3">
                                 <div class="form-group">
                                     <label for="status" class="d-block">Status</label>

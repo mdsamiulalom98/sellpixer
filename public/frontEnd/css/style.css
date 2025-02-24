@@ -2903,6 +2903,20 @@ form.sort-form .form-select:focus {
     color: #fff;
     z-index: 9999;
 }
+.fixed-top {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+}
+
+
+
+.logo-area.fixed-top {
+    top: -40px;
+    transform: translateY(40px);
+    transition: transform 1s;
+}
 
 .contact-form {
     background: #eaeaea;

@@ -55,28 +55,7 @@ class Product extends Model
     {
         return $this->hasMany('App\Models\ProductVariable')->where('stock', '>', 0)->whereNotNull('image');
     }
-
-    public function sizes()
-    {
-        return $this->belongsToMany('App\Models\Size', 'productsizes')->withTimestamps();
-    }
-    public function colors()
-    {
-        return $this->belongsToMany('App\Models\Color', 'productcolors')->withTimestamps();
-    }
-
-    public function prosizes()
-    {
-        return $this->hasMany('App\Models\Productsize');
-    }
-    public function procolors()
-    {
-        return $this->hasMany('App\Models\Productcolor');
-    }
-    public function prosize(){
-        return $this->hasOne(Productsize::class, 'product_id');
-    }
-    public function procolor() {
-        return $this->hasOne(Productcolor::class, 'product_id');
+    public function products(){
+        return $this->hasMany(Product::class, 'childcategory_id')->select('id','childcategory_id','status')->where('status', 1);
     }
 }

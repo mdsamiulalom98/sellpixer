@@ -18,7 +18,7 @@ class ColorController extends Controller
     }
     public function index(Request $request)
     {
-        $show_data = Color::orderBy('colorName','ASC')->get();
+        $show_data = Color::orderBy('name','ASC')->get();
         return view('backEnd.color.index',compact('show_data'));
     }
     public function create()

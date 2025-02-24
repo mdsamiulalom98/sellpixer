@@ -22,5 +22,8 @@ class Category extends Model
     {
         return $this->hasMany(Subcategory::class, 'category_id')->where('status', 1);
     }
+    public function products(){
+        return $this->hasMany(Product::class, 'childcategory_id')->select('id','childcategory_id','status')->where('status', 1);
+    }
 
 }

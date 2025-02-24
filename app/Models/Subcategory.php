@@ -16,6 +16,10 @@ class Subcategory extends Model
     public function category() {
         return $this->hasOne(Category::class, 'id', 'category_id')->select('id','slug','name','status');
     }
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'subcategory_id')->select('id','subcategory_id','status')->where('status', 1);
+    }
     
     
 }

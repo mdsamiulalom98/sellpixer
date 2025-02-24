@@ -31,7 +31,6 @@ class ShoppingController extends Controller
                 'slug' => $productInfo->slug,
                 'purchase_price' => $productInfo->purchase_price,
                 'category_id' => $productInfo->category_id,
-                'full_pdf' => $productInfo->full_pdf,
             ]
         ]);
 

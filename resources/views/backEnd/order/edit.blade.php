@@ -1,5 +1,5 @@
-@extends('backEnd.layouts.master') 
-@section('title','Order Edit') 
+@extends('backEnd.layouts.master')
+@section('title','Order Edit')
 @section('css')
 <style>
     .increment_btn,
@@ -10,7 +10,7 @@
 </style>
 <link href="{{asset('public/backEnd')}}/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
 <link href="{{asset('public/backEnd')}}/assets/libs/summernote/summernote-lite.min.css" rel="stylesheet" type="text/css" />
-@endsection 
+@endsection
 @section('content')
 <div class="container-fluid">
     <!-- start page title -->
@@ -137,9 +137,9 @@
                                         <select type="area" id="area" class="form-control @error('area') is-invalid @enderror" name="area"   required>
                                             <option value="">Select....</option>
                                             @foreach ($shippingcharge as $key => $value)
-                                            <option value="{{ $value->id }}" @if($shippinginfo->area = $value->name) selected @endif>{{ $value->name }}</option>
+                                            <option value="{{ $value->id }}" @if($shippinginfo->area == $value->name) selected @endif>{{ $value->name }}</option>
                                            @endforeach
-                                            
+
                                         </select>
                                         @error('email')
                                             <span class="invalid-feedback" role="alert">
@@ -157,7 +157,7 @@
                             <table class="table table-bordered">
                                 <tbody id="cart_details">
                                     @php
-                                        $subtotal = Cart::instance('pos_shopping')->subtotal();
+                                        $subtotal = Cart::instance('sale')->subtotal();
                                         $subtotal = str_replace(',','',$subtotal);
                                         $subtotal = str_replace('.00', '',$subtotal);
                                         $shipping = Session::get('pos_shipping');
@@ -194,7 +194,7 @@
         <!-- end col-->
     </div>
 </div>
-@endsection 
+@endsection
 @section('script')
 <script src="{{asset('public/backEnd/')}}/assets/libs/parsleyjs/parsley.min.js"></script>
 <script src="{{asset('public/backEnd/')}}/assets/js/pages/form-validation.init.js"></script>
@@ -273,7 +273,7 @@
         var qty = $(this).val();
         if(id){
               $.ajax({
-               cache: false, 
+               cache: false,
                type:"GET",
                data:{'id':id,'qty':qty},
                url:"{{route('admin.order.cart_decrement')}}",

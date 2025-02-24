@@ -1,5 +1,5 @@
 @php
-    $subtotal = Cart::instance('pos_shopping')->subtotal();
+    $subtotal = Cart::instance('sale')->subtotal();
     $subtotal = str_replace(',','',$subtotal);
     $subtotal = str_replace('.00', '',$subtotal);
     $shipping = Session::get('pos_shipping');
